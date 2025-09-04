@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModernObservability.EmailSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModernObservability.Greeter", "src\ModernObservability.Greeter\ModernObservability.Greeter.csproj", "{7AA0EBC3-6C15-4CA7-9C1E-BB8A4E9B65AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModernObservability.Telemetry", "src\ModernObservability.Telemetry\ModernObservability.Telemetry.csproj", "{71C5964C-6BF3-437C-9859-77F17520BB7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{7AA0EBC3-6C15-4CA7-9C1E-BB8A4E9B65AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AA0EBC3-6C15-4CA7-9C1E-BB8A4E9B65AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AA0EBC3-6C15-4CA7-9C1E-BB8A4E9B65AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71C5964C-6BF3-437C-9859-77F17520BB7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71C5964C-6BF3-437C-9859-77F17520BB7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71C5964C-6BF3-437C-9859-77F17520BB7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71C5964C-6BF3-437C-9859-77F17520BB7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1C067D67-8D5A-42A9-831B-0414A5A71F60} = {DB541A7F-B00B-4668-9862-4CF8F11212F4}
@@ -47,5 +53,6 @@ Global
 		{D4FE33B1-DE72-49D6-A9DE-3343D4E6E279} = {DAF3F815-7C2E-4B88-9059-2F3CEFCA26F0}
 		{7AA0EBC3-6C15-4CA7-9C1E-BB8A4E9B65AE} = {DAF3F815-7C2E-4B88-9059-2F3CEFCA26F0}
 		{32B87BD1-9ABE-493B-9445-CB3641815BD0} = {DAF3F815-7C2E-4B88-9059-2F3CEFCA26F0}
+		{71C5964C-6BF3-437C-9859-77F17520BB7C} = {DAF3F815-7C2E-4B88-9059-2F3CEFCA26F0}
 	EndGlobalSection
 EndGlobal
