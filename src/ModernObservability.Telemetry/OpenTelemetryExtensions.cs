@@ -24,6 +24,7 @@ public static class OpenTelemetryExtensions
             .UseOtlpExporter()
             .WithTracing(builder => builder
                 .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
                 .AddSource(DiagnosticSettings.ActivitySource.Name));
 
         return services;
