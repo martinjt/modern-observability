@@ -1,8 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using ModernObservability.Greeter;
 
-AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddServiceDiscovery();

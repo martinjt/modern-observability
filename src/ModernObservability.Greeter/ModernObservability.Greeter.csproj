@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.4.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ModernObservability.Telemetry\ModernObservability.Telemetry.csproj" />
+  </ItemGroup>
+
 </Project>

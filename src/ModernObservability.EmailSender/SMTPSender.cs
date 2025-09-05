@@ -18,6 +18,7 @@ class SMTPSender(IConfiguration configuration, ILogger<SMTPSender> logger)
             foreach (var greetedMessage in greetedMessages)
             {
                 logger.LogInformation("Sending email to {Firstname} {Surname}", greetedMessage.Firstname, greetedMessage.Surname);
+
                 var message = new MimeMessage();
                 var from = new MailboxAddress("Admin", "admin@modern-observability.workshop");
                 message.From.Add(from);
@@ -32,7 +33,6 @@ class SMTPSender(IConfiguration configuration, ILogger<SMTPSender> logger)
                 messages.Add(message);
             }
 
-            logger.LogInformation(_smtpConnectionString[9..]);
             _smtpClient.Connect(new Uri(_smtpConnectionString[9..]));
             foreach (var message in messages)
             {
