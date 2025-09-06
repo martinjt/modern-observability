@@ -10,10 +10,11 @@ namespace ModernObservability.Telemetry;
 
 public static class DiagnosticSettings
 {
-    private readonly static Lazy<ActivitySource> ActivitySourceInternal = new(() => new ActivitySource(Assembly.GetExecutingAssembly().GetName().Name!));
-    public static ActivitySource ActivitySource = ActivitySourceInternal.Value;
+    private readonly static string AssemblyName = Assembly.GetExecutingAssembly().GetName().Name!;
+    private readonly static Lazy<ActivitySource> ActivitySourceInternal = new(() => new ActivitySource(AssemblyName));
+    public static ActivitySource ActivitySource => ActivitySourceInternal.Value;
 
-    public static Lazy<Meter> Meter = new(() => new Meter(Assembly.GetExecutingAssembly().GetName().Name!));
+    internal static Lazy<Meter> Meter = new(() => new Meter(AssemblyName));
     public static Histogram<double> GreetedAge = Meter.Value.CreateHistogram<double>("greeted_age", "years", "Age of greeted person");
     public static Counter<int> EmailsSent = Meter.Value.CreateCounter<int>("emails_sent", "emails", "Number of emails sent");
 }
