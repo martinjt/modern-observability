@@ -4,6 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace ModernObservability.Telemetry;
@@ -21,12 +22,16 @@ public static class DiagnosticSettings
 
 public static class OpenTelemetryExtensions
 {
-
-    public static IServiceCollection SetupOpenTelemetry(this IServiceCollection services)
+    
+    public static IServiceCollection SetupOpenTelemetry(this IServiceCollection services, string serviceName)
     {
         AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
 
         services.AddOpenTelemetry()
+            .WithTracing(tracing => tracing.AddSource("Azure.Messaging.ServiceBus.*"));
+
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(serviceName))
             .UseOtlpExporter()
             .WithTracing(builder => builder
                 .AddAspNetCoreInstrumentation()
