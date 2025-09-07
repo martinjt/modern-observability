@@ -21,7 +21,7 @@ public static class DiagnosticSettings
 
 public static class OpenTelemetryExtensions
 {
-    
+
     public static IServiceCollection SetupOpenTelemetry(this IServiceCollection services)
     {
         AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
@@ -39,5 +39,20 @@ public static class OpenTelemetryExtensions
                 );
 
         return services;
+    }
+
+    /// <summary>
+    /// Extracts a value from the application properties and returns it as an array.
+    /// </summary>
+    /// <param name="properties"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public static IEnumerable<string> ExtractContextFromApplicationProperties(this IReadOnlyDictionary<string, object> properties, string key)
+    {
+        var valueFromProps = properties.TryGetValue(key, out var propertyValue)
+                ? propertyValue?.ToString() ?? ""
+                : "";
+
+        return [valueFromProps];
     }
 }
