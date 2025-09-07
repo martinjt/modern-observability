@@ -1,8 +1,11 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModernObservability.EmailSender;
+using ModernObservability.Telemetry;
+using OpenTelemetry.Context.Propagation;
 
 record GreetedMessage(string Firstname, string Surname, int Age);
 
@@ -28,7 +31,7 @@ class MessageProcessorService(ServiceBusProcessor _serviceBusProcessor, SMTPSend
             await args.CompleteMessageAsync(args.Message);
             return;
         }
-        _smtpSender.SendEmails(message);
+        _smtpSender.SendEmails([message]);
     }
 
     static Task ProcessErrorAsync(ProcessErrorEventArgs args)
