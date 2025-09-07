@@ -49,25 +49,24 @@ class BatchMessageProcessorService(ServiceBusReceiver _serviceBusReceiver, SMTPS
         while (!stoppingToken.IsCancellationRequested)
         {
             var messages = await _serviceBusReceiver!.ReceiveMessagesAsync(10, TimeSpan.FromSeconds(10), stoppingToken);
-            _logger.LogInformation("Received {Count} messages", messages.Count);
-            foreach (var message in messages)
-            {
-                var greetedMessage = JsonSerializer.Deserialize<GreetedMessage>(message.Body);
-                _smtpSender.SendEmails(greetedMessage!);
-            }
+            var receivedGreetings = messages
+                .Select(m => JsonSerializer.Deserialize<GreetedMessage>(m.Body)!)
+                .ToList();
+
+            _smtpSender.SendEmails(receivedGreetings);
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         }
     }
 }
 
 static class ServiceBusMessageExtensions
+{
+    public static T? Message<T>(this ProcessMessageEventArgs processMessageEventArgs)
     {
-        public static T? Message<T>(this ProcessMessageEventArgs processMessageEventArgs)
+        if (processMessageEventArgs?.Message?.Body is null)
         {
-            if (processMessageEventArgs?.Message?.Body is null)
-            {
-                throw new InvalidOperationException("Message body is null");
-            }
-            return JsonSerializer.Deserialize<T>(processMessageEventArgs.Message.Body);
+            throw new InvalidOperationException("Message body is null");
         }
+        return JsonSerializer.Deserialize<T>(processMessageEventArgs.Message.Body);
     }
+}

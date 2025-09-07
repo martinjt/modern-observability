@@ -10,7 +10,7 @@ class SMTPSender(IConfiguration configuration, ILogger<SMTPSender> logger)
     private readonly SmtpClient _smtpClient = new();
     private string _smtpConnectionString = configuration.GetConnectionString("smtp")!;
 
-    public void SendEmails(params GreetedMessage[] greetedMessages)
+    public void SendEmails(IEnumerable<GreetedMessage> greetedMessages)
     {
         lock (_smtpClient)
         {
