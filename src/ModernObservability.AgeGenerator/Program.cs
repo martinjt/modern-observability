@@ -4,7 +4,7 @@ using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.SetupOpenTelemetry("Age-Generator");
+builder.Services.SetupOpenTelemetry("AgeGenerator");
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();

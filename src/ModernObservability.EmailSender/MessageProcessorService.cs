@@ -1,8 +1,11 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModernObservability.EmailSender;
+using ModernObservability.Telemetry;
+using OpenTelemetry.Context.Propagation;
 
 record GreetedMessage(string Firstname, string Surname, int Age);
 
@@ -48,10 +51,26 @@ class BatchMessageProcessorService(ServiceBusReceiver _serviceBusReceiver, SMTPS
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            using var activity = DiagnosticSettings.ActivitySource
+                .StartActivity("BatchMessageProcessorService.ReceiveMessagesAsync", ActivityKind.Consumer);
             var messages = await _serviceBusReceiver!.ReceiveMessagesAsync(10, TimeSpan.FromSeconds(10), stoppingToken);
-            var receivedGreetings = messages
-                .Select(m => JsonSerializer.Deserialize<GreetedMessage>(m.Body)!)
-                .ToList();
+
+            var receivedGreetings = new List<GreetedMessage>();
+            foreach (var message in messages)
+            {
+                var propagationContext = Propagators.DefaultTextMapPropagator.Extract(
+                    default, message.ApplicationProperties, (carrier, key) =>
+                        carrier.ExtractContextFromApplicationProperties(key));
+
+                var greeting = JsonSerializer.Deserialize<GreetedMessage>(message.Body);
+
+                activity?.AddLink(new(propagationContext.ActivityContext,
+                    new ActivityTagsCollection {
+                     { "messageId", message.MessageId }
+                    }));
+            }
+
+            activity?.SetTag("message.count", messages.Count);
 
             _smtpSender.SendEmails(receivedGreetings);
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);

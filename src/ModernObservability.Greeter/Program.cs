@@ -1,7 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using ModernObservability.Greeter;
 using ModernObservability.Telemetry;
-using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -22,7 +22,7 @@ public static class DiagnosticSettings
 
 public static class OpenTelemetryExtensions
 {
-    
+
     public static IServiceCollection SetupOpenTelemetry(this IServiceCollection services, string serviceName)
     {
         AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
