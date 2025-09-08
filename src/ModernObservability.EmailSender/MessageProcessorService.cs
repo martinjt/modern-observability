@@ -44,7 +44,7 @@ class MessageProcessorService(ServiceBusProcessor _serviceBusProcessor, SMTPSend
 /// <summary>
 /// Batch Message Processor, gets up to 10 messages at a time and processes them in batches
 /// </summary>
-class BatchMessageProcessorService(ServiceBusReceiver _serviceBusReceiver, SMTPSender _smtpSender, ILogger<MessageProcessorService> _logger) : BackgroundService
+class BatchMessageProcessorService(ServiceBusReceiver _serviceBusReceiver, SMTPSender _smtpSender) : BackgroundService
 {
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

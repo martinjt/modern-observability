@@ -4,6 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace ModernObservability.Telemetry;
@@ -28,15 +29,16 @@ public static class OpenTelemetryExtensions
 
         services.AddOpenTelemetry()
             .UseOtlpExporter()
+            .ConfigureResource(resourceBuilder => resourceBuilder.AddHostDetector())
             .WithTracing(builder => builder
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
+                .AddProcessor(new BaggageSpanProcessor())
                 .AddSource(DiagnosticSettings.ActivitySource.Name))
             .WithMetrics(builder => builder
                 .AddMeter(DiagnosticSettings.Meter.Value.Name)
                 .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                );
+                .AddHttpClientInstrumentation());
 
         return services;
     }
@@ -54,5 +56,14 @@ public static class OpenTelemetryExtensions
                 : "";
 
         return [valueFromProps];
+    }
+}
+
+public class BaggageSpanProcessor : BaseProcessor<Activity>
+{
+    public override void OnEnd(Activity activity)
+    {
+        foreach (var item in Baggage.Current)
+            activity.SetTag(item.Key, item.Value);
     }
 }
