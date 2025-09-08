@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Diagnostics.Tracing;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -65,5 +67,25 @@ public class BaggageSpanProcessor : BaseProcessor<Activity>
     {
         foreach (var item in Baggage.Current)
             activity.SetTag(item.Key, item.Value);
+    }
+}
+
+public class LoggingOpenTelemetryListener : EventListener
+{
+    private readonly ILogger<LoggingOpenTelemetryListener> _logger;
+
+    public LoggingOpenTelemetryListener(ILogger<LoggingOpenTelemetryListener> logger)
+    {
+        _logger = logger;
+    }
+    protected override void OnEventSourceCreated(EventSource eventSource)
+    {
+        if (eventSource.Name.StartsWith("OpenTelemetry"))
+            EnableEvents(eventSource, EventLevel.Error);
+    }
+
+    protected override void OnEventWritten(EventWrittenEventArgs eventData)
+    {
+        _logger.LogWarning(eventData.Message, eventData.Payload?.Select(p => p?.ToString())?.ToArray());
     }
 }

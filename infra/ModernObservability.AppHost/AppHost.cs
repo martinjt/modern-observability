@@ -1,5 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var collector = builder.AddOpenTelemetryCollector("collector")
+    .WithConfig("./config.yaml")
+    .WithAppForwarding();
+
 var ageGenerator = builder.AddProject<Projects.ModernObservability_AgeGenerator>("agegenerator")
     .WithHttpHealthCheck("/healthcheck", 200);
 
