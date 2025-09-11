@@ -1,3 +1,4 @@
+using System.ClientModel.Primitives;
 using System.Diagnostics;
 using System.Text.Json;
 using Azure.Messaging.ServiceBus;
@@ -7,7 +8,10 @@ using ModernObservability.EmailSender;
 using ModernObservability.Telemetry;
 using OpenTelemetry.Context.Propagation;
 
-record GreetedMessage(string Firstname, string Surname, int Age);
+record GreetedMessage(string Firstname, string Surname, int Age)
+{
+    public ActivityContext Context { get; set; }
+};
 
 /// <summary>
 /// Single Message Processor, runs each message synchronously
@@ -46,15 +50,29 @@ class MessageProcessorService(ServiceBusProcessor _serviceBusProcessor, SMTPSend
 /// </summary>
 class BatchMessageProcessorService(ServiceBusReceiver _serviceBusReceiver, SMTPSender _smtpSender) : BackgroundService
 {
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            using var activity = DiagnosticSettings.ActivitySource
+                .StartActivity("receive messages", ActivityKind.Consumer);
             var messages = await _serviceBusReceiver!.ReceiveMessagesAsync(10, TimeSpan.FromSeconds(10), stoppingToken);
             var receivedGreetings = messages
-                .Select(m => JsonSerializer.Deserialize<GreetedMessage>(m.Body)!)
+                .Select(m =>
+                {
+                    var propagationContext = Propagators.DefaultTextMapPropagator.Extract(
+                        default,
+                        m.ApplicationProperties,
+                        (carrier, key) => carrier.ExtractContextFromApplicationProperties(key)
+                    );
+
+                    var greeting = JsonSerializer.Deserialize<GreetedMessage>(m.Body)!;
+                    greeting.Context = propagationContext.ActivityContext;
+                    return greeting; 
+                })
                 .ToList();
+
+            activity?.SetTag("message.count", messages.Count());
 
             _smtpSender.SendEmails(receivedGreetings);
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);

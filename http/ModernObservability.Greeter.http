@@ -1,6 +1,6 @@
-@ModernObservability.Greeter_HostAddress = http://localhost:5076
+@Greeter_HostAddress = http://localhost:5076
 
-GET {{ModernObservability.Greeter_HostAddress}}/?firstname=martin&surname=dotnet1
+GET {{Greeter_HostAddress}}/?firstname=martin1&surname=dotnet2
 Accept: application/json
 
 ###

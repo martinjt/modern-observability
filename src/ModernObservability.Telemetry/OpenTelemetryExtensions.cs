@@ -2,6 +2,7 @@
 using System.Diagnostics.Metrics;
 using System.Diagnostics.Tracing;
 using System.Reflection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
@@ -36,7 +37,8 @@ public static class OpenTelemetryExtensions
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddProcessor(new BaggageSpanProcessor())
-                .AddSource(DiagnosticSettings.ActivitySource.Name))
+                .AddSource(DiagnosticSettings.ActivitySource.Name)
+                .AddSource("Azure.Messaging.ServiceBus.*"))
             .WithMetrics(builder => builder
                 .AddMeter(DiagnosticSettings.Meter.Value.Name)
                 .AddAspNetCoreInstrumentation()
@@ -87,5 +89,22 @@ public class LoggingOpenTelemetryListener : EventListener
     protected override void OnEventWritten(EventWrittenEventArgs eventData)
     {
         _logger.LogWarning(eventData.Message, eventData.Payload?.Select(p => p?.ToString())?.ToArray());
+    }
+}
+
+public class HealthcheckSampler(IHttpContextAccessor httpContextAccessor, int percentage) : Sampler
+{
+    private readonly Random _random = new Random();
+    public override SamplingResult ShouldSample(in SamplingParameters samplingParameters)
+    {
+        if (httpContextAccessor.HttpContext?.Request.Path.StartsWithSegments("/healthcheck") ?? false &&
+            _random.Next(1, 100) > percentage)
+            return new SamplingResult(SamplingDecision.Drop);
+
+        return new SamplingResult(SamplingDecision.RecordAndSample, [
+            new("sample.rate", percentage),
+            new("sample.reason", "healthcheck-endpoint"),
+            new("sampler.name", nameof(HealthcheckSampler))
+        ], $"ot:sr={percentage}");
     }
 }

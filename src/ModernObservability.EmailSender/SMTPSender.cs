@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using ModernObservability.Telemetry;
 
 namespace ModernObservability.EmailSender;
 
@@ -14,7 +16,7 @@ class SMTPSender(IConfiguration configuration, ILogger<SMTPSender> logger)
     {
         lock (_smtpClient)
         {
-            var messages = new List<MimeMessage>();
+            _smtpClient.Connect(new Uri(_smtpConnectionString[9..]));
             foreach (var greetedMessage in greetedMessages)
             {
                 logger.LogInformation("Sending email to {Firstname} {Surname}", greetedMessage.Firstname, greetedMessage.Surname);
@@ -30,14 +32,13 @@ class SMTPSender(IConfiguration configuration, ILogger<SMTPSender> logger)
                 {
                     TextBody = "There is a world beyond auto-instrumentation"
                 };
-                messages.Add(message);
-            }
-
-            _smtpClient.Connect(new Uri(_smtpConnectionString[9..]));
-            foreach (var message in messages)
-            {
+                
+                using var activity = DiagnosticSettings.ActivitySource.StartActivity(
+                    "SendEmail", ActivityKind.Client, Activity.Current?.Context ?? new(),
+                    links: [new(greetedMessage.Context)]);
                 _smtpClient.Send(message);
             }
+
             _smtpClient.Disconnect(true);
         }
     }

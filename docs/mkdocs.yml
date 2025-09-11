@@ -1,0 +1,4 @@
+site_name: ModernObservability.AppHost
+nav:
+  - README.md
+  - person.md

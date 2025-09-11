@@ -16,6 +16,49 @@ processors:
       - set(resource.attributes["collector.enabled"], "true")
     metric_statements:
       - set(resource.attributes["collector.enabled"], "true")
+  tail_sampling/healthchecks:
+    decision_wait: 2s
+    policies: [
+      {
+        name: all-but-healthchecks,
+        type: and,
+        and: {
+          and_sub_policy:
+          [
+            {
+                name: is-not-healthcheck,
+                type: string_attribute,
+                string_attribute: { key: url.path, values: [ "/healthcheck" ], invert_match: true }
+            },
+            {
+              name: always-sample,
+              type: always_sample,
+            }
+          ]
+        }
+      },
+      {
+        name: 10-percent-healthchecks,
+        type: and,
+        and: {
+          and_sub_policy:
+          [
+            {
+                name: is-healthcheck,
+                type: string_attribute,
+                string_attribute: { key: url.path, values: [ "/healthcheck" ] }
+            },
+            {
+              # apply probabilistic sampling
+              name: probabilistic-policy,
+              type: probabilistic,
+              probabilistic: { sampling_percentage: 90 },
+            }
+          ]
+        }
+      },
+    ]
+    
 
 exporters:
   otlp/aspire:
@@ -25,17 +68,45 @@ exporters:
     tls:
       insecure_skip_verify: true
   
+connectors:
+  signaltometrics:
+    spans:
+      - name: request_duration
+        description: Span durations
+        unit: ms
+        attributes:
+          - key: firstname
+          - key: surname
+        conditions: 
+          - resource.attributes["service.name"] == "greeter"
+          - span.parent_span_id == nil
+        histogram:
+          count: "Int(AdjustedCount())"
+          value: Milliseconds(end_time - start_time)
+      - name: requested_age
+        description: Span durations
+        unit: ms
+        attributes:
+          - key: firstname
+          - key: surname
+        conditions: 
+          - resource.attributes["service.name"] == "greeter"
+          - span.parent_span_id == nil
+        histogram:
+          count: "Int(AdjustedCount())"
+          value: span.attributes["age"]
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch, transform/add-collector-enabled]
-      exporters: [otlp/aspire]
+      processors: [tail_sampling/healthchecks, batch, transform/add-collector-enabled]
+      exporters: [signaltometrics, otlp/aspire]
     metrics:
-      receivers: [otlp]
+      receivers: [signaltometrics]
       processors: [batch, transform/add-collector-enabled]
       exporters: [otlp/aspire]
     logs:
       receivers: [otlp]
       processors: [batch, transform/add-collector-enabled]
-      exporters: [debug,otlp/aspire]
+      exporters: [otlp/aspire]

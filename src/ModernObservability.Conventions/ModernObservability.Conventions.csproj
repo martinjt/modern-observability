@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+    <Target Name="BuildConventions" BeforeTargets="PreBuildEvent">
+        <Exec Command="docker run --rm \
+    -v $(pwd)/Conventions:/output \
+    -v $(pwd)/Model:/conventions \
+    -v $(pwd)/templates:/templates \
+    otel/weaver:latest \
+    registry generate csharp \
+    --registry=/conventions \
+    --templates=/templates \
+    /output/"/>
+    </Target>
+
+</Project>

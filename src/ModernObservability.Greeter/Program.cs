@@ -9,6 +9,13 @@ using OpenTelemetry.Trace;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.SetupOpenTelemetry();
+builder.Services.AddHttpContextAccessor();
+builder.Services.ConfigureOpenTelemetryTracerProvider((sp, builder) =>
+{
+    var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+    builder.SetSampler(new HealthcheckSampler(httpContextAccessor, 50));
+});
+
 builder.Services.AddServiceDiscovery();
 builder.Services.ConfigureHttpClientDefaults(http => http.AddServiceDiscovery());
 builder.Services.AddHealthChecks();
