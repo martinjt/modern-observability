@@ -1,8 +1,14 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var liveCheck = builder.AddContainer("live-check", "otel/weaver:latest")
+    .WithBindMount("../../src/ModernObservability.Conventions/Model", "/conventions")
+    .WithArgs("registry", "live-check", "--registry=/conventions", "--inactivity-timeout=600", "--include-unreferenced")
+    .WithHttpEndpoint(name: "GRPC", targetPort: 4317);
+
 var collector = builder.AddOpenTelemetryCollector("collector", settings => settings.ForceNonSecureReceiver = true)
     .WithConfig("./config.yaml")
-    .WithAppForwarding();
+    .WithAppForwarding()
+    .WithEnvironment("LIVE_CHECK_ENDPOINT", liveCheck.GetEndpoint("GRPC"));
 
 var ageGenerator = builder.AddProject<Projects.ModernObservability_AgeGenerator>("agegenerator")
     .WithHttpHealthCheck("/healthcheck", 200);
@@ -39,6 +45,5 @@ builder.AddContainer("docs", "squidfunk/mkdocs-material:latest")
     .WithContainerFiles("/docs", "../../docs/mkdocs.yml")
     .WithHttpEndpoint(name: "Docs", targetPort: 8000)
     .WaitForCompletion(docsGenerator);
-
 
 builder.Build().Run();

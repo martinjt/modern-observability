@@ -67,6 +67,12 @@ exporters:
       x-otlp-api-key: ${env:ASPIRE_API_KEY}
     tls:
       insecure_skip_verify: true
+
+  otlp/livecheck:
+    endpoint: ${env:LIVE_CHECK_ENDPOINT}
+    compression: none
+    tls:
+      insecure: true
   
 connectors:
   signaltometrics:
@@ -101,7 +107,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [tail_sampling/healthchecks, batch, transform/add-collector-enabled]
-      exporters: [signaltometrics, otlp/aspire]
+      exporters: [signaltometrics, otlp/aspire, otlp/livecheck]
     metrics:
       receivers: [signaltometrics]
       processors: [batch, transform/add-collector-enabled]
