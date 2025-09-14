@@ -3,7 +3,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var ageGenerator = builder.AddProject<Projects.ModernObservability_AgeGenerator>("agegenerator");
 
 var servicebus = builder.AddAzureServiceBus("servicebus")
-    .RunAsEmulator();
+    .RunAsEmulator(configuration => configuration.WithLifetime(ContainerLifetime.Persistent));
 
 var smtpService = builder.AddPapercutSmtp("smtp");
 
@@ -14,7 +14,7 @@ builder.AddProject<Projects.ModernObservability_Greeter>("greeter")
     .WithReference(ageGenerator);
 
 builder.AddProject<Projects.ModernObservability_EmailSender>("emailsender")
-    .WithReference(greetingsQueue).WaitFor(greetingsQueue)
+    .WithReference(greetingsQueue).WaitFor(greetingsQueue)  
     .WithReference(smtpService);
 
 builder.Build().Run();
