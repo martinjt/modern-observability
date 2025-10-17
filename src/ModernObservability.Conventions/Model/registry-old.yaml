@@ -1,0 +1,31 @@
+groups:
+  - id: registry.person
+    type: attribute_group
+    display_name: "Attributes about the person"
+    brief: >
+      A team
+    attributes:
+      - id: person.firstname
+        type: string
+        brief: >
+          The first name of the person
+        examples: ["martin", "dave"]
+        stability: stable
+      - id: person.surname
+        type: string
+        brief: >
+          The surname of the person
+        examples: ["jones", "smith"]
+        stability: stable
+      - id: person.email
+        type: string
+        brief: >
+          The email address of the person
+        examples: ["martin@jones.com", "dave@smith.com"]
+        stability: stable
+      - id: person.age
+        type: int
+        brief: >
+          The age of the person
+        examples: [30, 40]
+        stability: stable

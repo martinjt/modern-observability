@@ -1,31 +1,22 @@
 groups:
-  - id: registry.person
+  - id: registry.conference
     type: attribute_group
-    display_name: "Attributes about the person"
+    display_name: "Attributes about the conference"
     brief: >
-      A team
+      Attributes relating to the conference
     attributes:
-      - id: person.firstname
+      - id: conference.brand
         type: string
         brief: >
-          The first name of the person
-        examples: ["martin", "dave"]
+          The brand organisting the conference
+        note: >
+          This is used to group conferences, and could also be a sub-brand
+          It should not be the unique Id, but the name the conference uses
+        examples: ["GOTO", "YOW!"]
         stability: stable
-      - id: person.surname
+      - id: conference.name
         type: string
         brief: >
-          The surname of the person
-        examples: ["jones", "smith"]
-        stability: stable
-      - id: person.email
-        type: string
-        brief: >
-          The email address of the person
-        examples: ["martin@jones.com", "dave@smith.com"]
-        stability: stable
-      - id: person.age
-        type: int
-        brief: >
-          The age of the person
-        examples: [30, 40]
+          The advertising name of the conference
+        examples: ["GOTO CPH", "Unscripted Series"]
         stability: stable

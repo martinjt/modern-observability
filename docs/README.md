@@ -33,6 +33,7 @@ All registered attributes are listed by namespace in this registry.
 
 Currently, the following namespaces exist:
 
+- [Conference](conference.md)
 - [Person](person.md)
 
 [developers recommendations]: ../general/naming.md#recommendations-for-application-developers
